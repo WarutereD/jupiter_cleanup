@@ -1,0 +1,64 @@
+# Import necessary libraries
+import pandas as pd
+import re
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import SnowballStemmer, WordNetLemmatizer
+
+# Load your social media data
+data = pd.read_csv("/workspaces/codespaces-jupyter/data/Dataset_1.csv")
+
+# Clean the text data
+def clean_text(text):
+    # Remove URLs
+    text = re.sub(r"http\S+", "", text)
+    # Remove special characters
+    text = re.sub(r"[^a-zA-Z0-9]+", " ", text)
+    # Convert text to lowercase
+    text = text.lower()
+    return text
+
+data["clean_text"] = data["text"].apply(clean_text)
+
+# Tokenize the text data
+def tokenize_text(text):
+    tokens = word_tokenize(text)
+    return tokens
+
+data["tokenized_text"] = data["clean_text"].apply(tokenize_text)
+
+# Remove stopwords
+stop_words = set(stopwords.words("english"))
+
+def remove_stopwords(tokens):
+    filtered_tokens = [token for token in tokens if token not in stop_words]
+    return filtered_tokens
+
+data["filtered_tokens"] = data["tokenized_text"].apply(remove_stopwords)
+
+# Stem the data
+stemmer = SnowballStemmer("english")
+
+def stem_tokens(tokens):
+    stemmed_tokens = [stemmer.stem(token) for token in tokens]
+    return stemmed_tokens
+
+data["stemmed_tokens"] = data["filtered_tokens"].apply(stem_tokens)
+
+# Display a sample of the stemmed data
+print(data["stemmed_tokens"].sample(10))
+
+# Lemmatize the data
+lemmatizer = WordNetLemmatizer()
+
+def lemmatize_tokens(tokens):
+    lemmatized_tokens = [lemmatizer.lemmatize(token) for token in tokens]
+    return lemmatized_tokens
+
+data["lemmatized_tokens"] = data["filtered_tokens"].apply(lemmatize_tokens)
+
+# Display a sample of the lemmatized data
+print(data["lemmatized_tokens"].sample(10))
